@@ -139,63 +139,64 @@ def render(c, width, height, df_escola):
 
     anos_escolaridade = sorted(df_escola['ANO_ESCOLARIDADE'].unique())
     num_anos = len(anos_escolaridade)
-    
-    # Cálculo dinâmico para caber tudo na mesma página
-    # Espaço disponível ~ 21cm (A4 total é ~29cm, Header/Footer tiram uns 8cm)
-    available_h = curr_y - 2.0*cm # Margem inferior reduzida
+
+    avaliacoes = sorted(df_escola['ANO'].astype(str).unique())
+    avaliacao_1 = avaliacoes[0] if len(avaliacoes) > 0 else None
+    avaliacao_2 = avaliacoes[1] if len(avaliacoes) > 1 else None
+
+    available_h = curr_y - 2.0*cm
     row_h = available_h / num_anos
-    section_title_h = 0.35*cm 
-    chart_h_render = row_h - section_title_h 
-    
-    # chart_h_fig (polegadas) proporcional - Multiplicador aumentado para esticar mais
-    chart_h_fig = (chart_h_render / cm) / 2.54 * 1.8 
-    
-    # Reduzindo margens laterais para 1.5cm e gap para 0.2cm
-    chart_w = (width - 3.2*cm) / 2 
+    section_title_h = 0.35*cm
+    chart_h_render = row_h - section_title_h
+
+    chart_h_fig = (chart_h_render / cm) / 2.54 * 1.8
+
+    chart_w = (width - 3.2*cm) / 2
     col1_x = 1.5*cm
     col2_x = width - 1.5*cm - chart_w
-    
+
     for ano_esc in anos_escolaridade:
-        # Seção estilo Distorção - Centralizada e fonte 11 negrito
         c.setFillColor(colors.HexColor('#1565C0'))
-        c.setFont(FONT_CABECALHO, 11) # Aumentado para 11
+        c.setFont(FONT_CABECALHO, 11)
         c.drawCentredString(width / 2.0, curr_y - 0.2*cm, ano_esc)
         c.setStrokeColor(colors.HexColor('#1565C0'))
         c.setLineWidth(0.4)
         c.line(1.5*cm, curr_y - 0.3*cm, width - 1.5*cm, curr_y - 0.3*cm)
-        
+
         curr_y -= section_title_h
-        
-        # Filtros e Geração
-        df_24 = df_escola[(df_escola['ANO_ESCOLARIDADE'] == ano_esc) & (df_escola['ANO'].astype(str).str.startswith('2024'))]
-        df_25 = df_escola[(df_escola['ANO_ESCOLARIDADE'] == ano_esc) & (df_escola['ANO'].astype(str).str.startswith('2025'))]
-        
-        fname_24 = f"tmp_fluencia_{ano_esc.replace(' ','_')}_2024.png"
-        fname_25 = f"tmp_fluencia_{ano_esc.replace(' ','_')}_2025.png"
-        
+
+        df_1 = df_escola[(df_escola['ANO_ESCOLARIDADE'] == ano_esc) & (df_escola['ANO'].astype(str) == avaliacao_1)] if avaliacao_1 else pd.DataFrame()
+        df_2 = df_escola[(df_escola['ANO_ESCOLARIDADE'] == ano_esc) & (df_escola['ANO'].astype(str) == avaliacao_2)] if avaliacao_2 else pd.DataFrame()
+
+        fname_1 = f"tmp_fluencia_{ano_esc.replace(' ','_')}_{avaliacao_1}.png" if avaliacao_1 else None
+        fname_2 = f"tmp_fluencia_{ano_esc.replace(' ','_')}_{avaliacao_2}.png" if avaliacao_2 else None
+
         is_last = (ano_esc == anos_escolaridade[-1])
-        
-        img_24 = create_individual_chart(df_24, "2024 - Av. de Saída", fname_24, chart_height=chart_h_fig, is_last_row=is_last)
-        img_25 = create_individual_chart(df_25, "2025 - Av. de Saída", fname_25, chart_height=chart_h_fig, is_last_row=is_last)
-        
-        if img_24:
-            # drawImage com a nova largura/altura máximas
-            c.drawImage(img_24, col1_x, curr_y - chart_h_render, width=chart_w, height=chart_h_render, preserveAspectRatio=True)
-            os.remove(img_24)
+
+        img_1 = create_individual_chart(df_1, avaliacao_1, fname_1, chart_height=chart_h_fig, is_last_row=is_last) if avaliacao_1 else None
+        img_2 = create_individual_chart(df_2, avaliacao_2, fname_2, chart_height=chart_h_fig, is_last_row=is_last) if avaliacao_2 else None
+
+        if img_1:
+            c.drawImage(img_1, col1_x, curr_y - chart_h_render, width=chart_w, height=chart_h_render, preserveAspectRatio=True)
+            os.remove(img_1)
         else:
+            ano_base = int(avaliacao_2[:4]) - 1
+            resto = avaliacao_2[4:]
             c.setStrokeColorRGB(0.9, 0.9, 0.9)
             c.rect(col1_x, curr_y - chart_h_render + 0.2*cm, chart_w, chart_h_render - 0.4*cm, stroke=1, fill=0)
             c.setFont(FONT_TEXTO, 8)
-            c.drawCentredString(col1_x + chart_w/2, curr_y - chart_h_render/2, "Sem dados 2024")
+            c.drawCentredString(col1_x + chart_w/2, curr_y - chart_h_render/2, f"Sem dados{resto} de {ano_base}")
 
-        if img_25:
-            c.drawImage(img_25, col2_x, curr_y - chart_h_render, width=chart_w, height=chart_h_render, preserveAspectRatio=True)
-            os.remove(img_25)
+        if img_2:
+            c.drawImage(img_2, col2_x, curr_y - chart_h_render, width=chart_w, height=chart_h_render, preserveAspectRatio=True)
+            os.remove(img_2)
         else:
+            ano_base = int(avaliacao_1[:4]) + 1
+            resto = avaliacao_1[4:]
             c.setStrokeColorRGB(0.9, 0.9, 0.9)
             c.rect(col2_x, curr_y - chart_h_render + 0.2*cm, chart_w, chart_h_render - 0.4*cm, stroke=1, fill=0)
             c.setFont(FONT_TEXTO, 8)
-            c.drawCentredString(col2_x + chart_w/2, curr_y - chart_h_render/2, "Sem dados 2025")
+            c.drawCentredString(col2_x + chart_w/2, curr_y - chart_h_render/2, f"Sem dados{resto} de {ano_base}")
 
         curr_y -= chart_h_render
         

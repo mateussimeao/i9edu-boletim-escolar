@@ -50,7 +50,7 @@ def generate_school_report(escola, regional, df_prosa, df_ideb_escola, df_mat_es
 def main():
     print("Iniciando geração de relatórios (Plataforma Modular)...")
     
-    output_dir = r'G:\Drives compartilhados\Indicadores do Painel Educação à Vista\BOLETIM DAS ESCOLAS'
+    output_dir = r'G:\Shared drives\Indicadores do Painel Educação à Vista\BOLETIM DAS ESCOLAS'
     # output_dir = 'relatorios'
     # if os.path.exists(output_dir):
     #     shutil.rmtree(output_dir)
@@ -90,7 +90,13 @@ def main():
     # Carregar dados IDEB, MATRÍCULAS, FLUÊNCIA, TAXA DE RENDIMENTO e DISTORÇÃO
     df_ideb = pd.read_excel('data/IDEB.xlsx')
     df_matriculas = pd.read_excel('data/MATRICULAS.xlsx')
-    df_fluencia = fluencia_leitora.load_real_data('data/fluencia_leitora.xlsx')
+    df_fluencia_25 = fluencia_leitora.load_real_data('data/leitura_diag_2025.xlsx')
+    df_fluencia_26 = fluencia_leitora.load_real_data('data/leitura_diag_2026.xlsx')
+    df_fluencia = pd.concat([df_fluencia_25, df_fluencia_26])
+    if not df_fluencia.empty and 'ESCOLA' in df_fluencia.columns:
+        df_fluencia['ESCOLA'] = (df_fluencia['ESCOLA'].astype(str)
+            .str.replace(r'^EM ', 'ESCOLA MUNICIPAL ', regex=True)
+            .str.replace(r'^CMEI ', 'CENTRO MUNICIPAL DE EDUCACAO INFANTIL ', regex=True))
     df_taxa = pd.read_excel('data/TAXA_RENDIMENTO.xlsx')
     df_distorcao = pd.read_excel('data/TAXA_DISTORCAO.xlsx')
     
@@ -172,9 +178,9 @@ def main():
         print(f"Gerando relatório: {escola} - Regional {regional} {count}/{len(lista_escolas_regionais)}")
         generate_school_report(escola, regional, df_prosa_escola, df_ideb_escola, df_mat_escola, df_fluencia_escola, df_taxa_escola, df_distorcao_escola, regional_dir, df_prosa_media_escola, df_sabe_escola)
         
-        count += 1
+        # count += 1
         # if count > 1:
-        #     break 
+        #     break
             
     print("Processo concluído.")
 

@@ -78,7 +78,7 @@ def generate_rede_reports(df_prosa, df_ideb, df_mat, df_fluencia, df_taxa, df_di
 def main():
     print("Iniciando geração de relatórios de REDE (Estrutura Vista)...")
     # output_base_dir = 'relatorios_vista'
-    output_base_dir = r"G:\Drives compartilhados\Indicadores do Painel Educação à Vista\RELATORIOS SMED"
+    output_base_dir = r"G:\Shared drives\Indicadores do Painel Educação à Vista\RELATORIOS SMED"
     output_dir = os.path.join(output_base_dir, "REDE")
     os.makedirs(output_dir, exist_ok=True)
     
@@ -115,7 +115,15 @@ def main():
     # 4. Carregar outros dados
     df_ideb = pd.read_excel('data/IDEB_REDE.xlsx')
     df_matriculas = pd.read_excel('data/MATRICULAS.xlsx')
-    df_fluencia = fluencia_leitora.load_real_data('data/fluencia_leitora.xlsx')
+    df_fluencia_25 = fluencia_leitora.load_real_data('data/leitura_diag_2025.xlsx')
+    df_fluencia_26 = fluencia_leitora.load_real_data('data/leitura_diag_2026.xlsx')
+    df_fluencia = pd.concat([df_fluencia_25, df_fluencia_26])
+    if not df_fluencia.empty and 'ESCOLA' in df_fluencia.columns:
+        df_fluencia['ESCOLA'] = (df_fluencia['ESCOLA'].astype(str)
+            .str.replace(r'^EM ', 'ESCOLA MUNICIPAL ', regex=True)
+            .str.replace(r'^CMEI ', 'CENTRO MUNICIPAL DE EDUCACAO INFANTIL ', regex=True))
+    df_taxa = pd.read_excel('data/TAXA_RENDIMENTO.xlsx')
+    df_distorcao = pd.read_excel('data/TAXA_DISTORCAO.xlsx')
     df_taxa = pd.read_excel('data/TAXA_RENDIMENTO.xlsx')
     df_distorcao = pd.read_excel('data/TAXA_DISTORCAO.xlsx')
     

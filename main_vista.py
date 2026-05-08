@@ -96,7 +96,7 @@ def generate_individual_reports(escola, regional, df_prosa, df_ideb_escola, df_m
 def main():
     print("Iniciando geração de relatórios individuais por indicador (Estrutura Vista)...")
     
-    output_dir = r'G:\Drives compartilhados\Indicadores do Painel Educação à Vista\RELATORIOS SMED'
+    output_dir = r'G:\Shared drives\Indicadores do Painel Educação à Vista\RELATORIOS SMED'
     # output_dir = 'relatorios_vista'
     os.makedirs(output_dir, exist_ok=True)
     
@@ -155,7 +155,13 @@ def main():
     # Carregar dados IDEB, MATRÍCULAS, FLUÊNCIA, TAXA DE RENDIMENTO e DISTORÇÃO
     df_ideb = pd.read_excel('data/IDEB.xlsx')
     df_matriculas = pd.read_excel('data/MATRICULAS.xlsx')
-    df_fluencia = fluencia_leitora.load_real_data('data/fluencia_leitora.xlsx')
+    df_fluencia_25 = fluencia_leitora.load_real_data('data/leitura_diag_2025.xlsx')
+    df_fluencia_26 = fluencia_leitora.load_real_data('data/leitura_diag_2026.xlsx')
+    df_fluencia = pd.concat([df_fluencia_25, df_fluencia_26])
+    if not df_fluencia.empty and 'ESCOLA' in df_fluencia.columns:
+        df_fluencia['ESCOLA'] = (df_fluencia['ESCOLA'].astype(str)
+            .str.replace(r'^EM ', 'ESCOLA MUNICIPAL ', regex=True)
+            .str.replace(r'^CMEI ', 'CENTRO MUNICIPAL DE EDUCACAO INFANTIL ', regex=True))
     df_taxa = pd.read_excel('data/TAXA_RENDIMENTO.xlsx')
     df_distorcao = pd.read_excel('data/TAXA_DISTORCAO.xlsx')
     # Carregar dados SABE
@@ -223,7 +229,7 @@ def main():
     lista_escolas_regionais = df_prosa[['TRI_NM_REGIONAL', 'TRI_NM_ESCOLA']].drop_duplicates()
     # lista_escolas_regionais = df_teste[['TRI_NM_REGIONAL', 'TRI_NM_ESCOLA']].drop_duplicates()
     # lista_escolas_regionais = lista_escolas_regionais[lista_escolas_regionais['TRI_NM_REGIONAL'] != 'SAO CAETANO']
-    lista_escolas_regionais = lista_escolas_regionais[lista_escolas_regionais['TRI_NM_REGIONAL'].isin(['CENTRO'])]
+    # lista_escolas_regionais = lista_escolas_regionais[lista_escolas_regionais['TRI_NM_REGIONAL'].isin(['CENTRO'])]
     lista_escolas_regionais = lista_escolas_regionais.sort_values(['TRI_NM_REGIONAL', 'TRI_NM_ESCOLA'])
     count = 1
     total = len(lista_escolas_regionais)
@@ -278,8 +284,8 @@ def main():
         
         count += 1
         # Para teste, descomente as linhas abaixo se quiser limitar
-        # if count > 2:
-        #     break
+        if count > 2:
+            break
             
     print("Processo concluído.")
 
