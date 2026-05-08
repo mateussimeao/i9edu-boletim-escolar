@@ -284,8 +284,8 @@ def main():
         
         count += 1
         # Para teste, descomente as linhas abaixo se quiser limitar
-        if count > 2:
-            break
+        # if count > 2:
+        #     break
             
     print("Processo concluído.")
 
