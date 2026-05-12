@@ -1,4 +1,5 @@
 import os
+import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 from reportlab.lib.units import cm
@@ -7,6 +8,17 @@ from reportlab.platypus import Paragraph
 from reportlab.lib.styles import getSampleStyleSheet
 from pdf_engine import draw_header, draw_footer
 from fonts import FONT_TITULO, FONT_CABECALHO, FONT_NUMERO, FONT_TEXTO
+
+_df_ica = None
+
+def _load_ica():
+    global _df_ica
+    if _df_ica is None:
+        try:
+            _df_ica = pd.read_excel('data/ICA.xlsx', sheet_name='Planilha4', header=3)
+        except Exception:
+            _df_ica = pd.DataFrame()
+    return _df_ica
 
 PADRAO_COLORS = {
     '4.Abaixo do Básico': '#e0493e',
@@ -113,15 +125,31 @@ def render(c, width, height, df_escola):
     c.setFillColor(colors.HexColor('#056cad'))
     c.setFont(FONT_TITULO, 17)
     c.drawCentredString(width / 2.0, height - 4.5*cm, "SABE")
+
+    # ICA
+    ica_label = ""
+    df_ica = _load_ica()
+    if not df_ica.empty and hasattr(c, 'escola_nome'):
+        col_rotulos = 'Rótulos de Linha'
+        if col_rotulos in df_ica.columns:
+            match = df_ica[df_ica[col_rotulos] == c.escola_nome]
+            if not match.empty:
+                sim_val = match.iloc[0]['Sim']
+                pct_str = f"{sim_val * 100:.1f}".replace('.', ',')
+                ica_label = f"Indicador Criança Alfabetizada (ICA): {pct_str}%"
+
     c.setFillColorRGB(0, 0, 0)
-    
+    if ica_label:
+        c.setFont(FONT_NUMERO, 11)
+        c.drawString(2*cm, height - 5.2*cm, ica_label)
+
     styles = getSampleStyleSheet()
     style_n = styles['Normal']
     style_n.fontName = FONT_TEXTO
     style_n.fontSize = 11
     style_n.leading = 14
     style_n.alignment = 4
-    
+
     texto_sabe = (
         "O <b>SABE</b> (Sistema de Avaliação Baiano de Educação) é um sistema de avaliação externa que visa analisar o "
         "desempenho dos estudantes nas escolas públicas e privadas da Bahia, em diferentes áreas do conhecimento, como "
@@ -129,7 +157,7 @@ def render(c, width, height, df_escola):
     )
     p = Paragraph(texto_sabe, style_n)
     p_w, p_h = p.wrap(width - 4*cm, height)
-    p.drawOn(c, 2*cm, height - 5.1*cm - p_h)
+    p.drawOn(c, 2*cm, height - 5.8*cm - p_h)
     
     legenda_path = "assets/legenda.jpg"
     if os.path.exists(legenda_path):
