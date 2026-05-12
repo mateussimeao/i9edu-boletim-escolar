@@ -15,10 +15,35 @@ def _load_ica():
     global _df_ica
     if _df_ica is None:
         try:
-            _df_ica = pd.read_excel('data/ICA.xlsx', sheet_name='Planilha4', header=3)
+            _df_ica = pd.read_csv('data/ICA.csv')
         except Exception:
             _df_ica = pd.DataFrame()
     return _df_ica
+
+def _get_ica_value(df_ica, escola_nome):
+    if df_ica.empty or 'ESCOLA' not in df_ica.columns or 'Sim' not in df_ica.columns:
+        return None
+
+    if escola_nome.startswith("REGIONAL: ") or escola_nome.startswith("MÉDIA REGIONAL: "):
+        prefix = "REGIONAL: " if escola_nome.startswith("REGIONAL: ") else "MÉDIA REGIONAL: "
+        regional_nome = escola_nome[len(prefix):]
+        if 'REGIONAL' not in df_ica.columns:
+            return None
+        df_reg = df_ica[df_ica['REGIONAL'] == regional_nome]
+        if df_reg.empty:
+            return None
+        return df_reg['Sim'].mean()
+
+    if escola_nome in ("REDE MUNICIPAL", "MÉDIA REDE"):
+        match = df_ica[df_ica['ESCOLA'] == 'Total Geral']
+        if match.empty:
+            return None
+        return match.iloc[0]['Sim']
+
+    match = df_ica[df_ica['ESCOLA'] == escola_nome]
+    if match.empty:
+        return None
+    return match.iloc[0]['Sim']
 
 PADRAO_COLORS = {
     '4.Abaixo do Básico': '#e0493e',
@@ -130,18 +155,17 @@ def render(c, width, height, df_escola):
     ica_label = ""
     df_ica = _load_ica()
     if not df_ica.empty and hasattr(c, 'escola_nome'):
-        col_rotulos = 'Rótulos de Linha'
-        if col_rotulos in df_ica.columns:
-            match = df_ica[df_ica[col_rotulos] == c.escola_nome]
-            if not match.empty:
-                sim_val = match.iloc[0]['Sim']
-                pct_str = f"{sim_val * 100:.1f}".replace('.', ',')
-                ica_label = f"Indicador Criança Alfabetizada (ICA): {pct_str}%"
+        sim_val = _get_ica_value(df_ica, c.escola_nome)
+        if sim_val is not None:
+            pct_str = f"{sim_val * 100:.1f}".replace('.', ',')
+            ica_label = f"Indicador Criança Alfabetizada (ICA): {pct_str}%"
 
     c.setFillColorRGB(0, 0, 0)
+    paragraph_height = 5.1
     if ica_label:
         c.setFont(FONT_NUMERO, 11)
         c.drawString(2*cm, height - 5.2*cm, ica_label)
+        paragraph_height = 5.8
 
     styles = getSampleStyleSheet()
     style_n = styles['Normal']
@@ -157,7 +181,7 @@ def render(c, width, height, df_escola):
     )
     p = Paragraph(texto_sabe, style_n)
     p_w, p_h = p.wrap(width - 4*cm, height)
-    p.drawOn(c, 2*cm, height - 5.8*cm - p_h)
+    p.drawOn(c, 2*cm, height - paragraph_height*cm - p_h)
     
     legenda_path = "assets/legenda.jpg"
     if os.path.exists(legenda_path):

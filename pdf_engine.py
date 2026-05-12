@@ -63,7 +63,10 @@ def draw_footer(c, width, height, qr_code_name=None):
     c.setFillColorRGB(0, 0, 0)
     c.setFont("Helvetica", 10)
     c.drawString(1*cm, 1*cm, "Fonte: Nossa Escola em Dados")
-    
+
+    if getattr(c, 'no_qr', False):
+        return
+
     if not qr_code_name:
         qr_code_name = getattr(c, 'qr_code_name', None)
         
