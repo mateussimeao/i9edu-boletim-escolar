@@ -31,9 +31,9 @@ def render(c, width, height, escola, regional):
     p_escola.drawOn(c, 2*cm, curr_y - p_h)
     
     curr_y -= (p_h + 0.8*cm)
-    # if not (escola.startswith("REGIONAL: ") or escola.startswith("MÉDIA REGIONAL: ")):
-    c.setFont(FONT_CABECALHO, 16)
-    c.drawCentredString(width / 2.0, curr_y, f"Regional: {regional}")
+    if not (escola.startswith("REGIONAL: ") or escola.startswith("MÉDIA REGIONAL: ")):
+        c.setFont(FONT_CABECALHO, 16)
+        c.drawCentredString(width / 2.0, curr_y, f"Regional: {regional}")
     
     curr_y -= 0.8*cm
     c.setFillColorRGB(0, 0, 0)

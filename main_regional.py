@@ -171,7 +171,7 @@ def main():
         generate_regional_report(regional, df_prosa_reg, df_ideb_reg, df_mat_reg, df_fluencia_reg, df_taxa_reg, df_distorcao_reg, regional_dir, df_prosa_media_reg, df_sabe_reg, df_metas_reg)
 
         count += 1
-        # if count > 2:
+        # if count > 1:
         #     break
 
     print("Processo concluído.")
