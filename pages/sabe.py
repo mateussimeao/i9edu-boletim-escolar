@@ -236,5 +236,5 @@ def render(c, width, height, df_escola):
         if img and os.path.exists(img):
             os.remove(img)
             
-    draw_footer(c, width, height)
+    draw_footer(c, width, height, qr_size_cm=2.5, qr_right_margin_cm=0.01)
     c.showPage()

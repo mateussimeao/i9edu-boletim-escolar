@@ -59,7 +59,7 @@ def draw_header(c, width, height, is_first_page=False):
         # Desenhar abaixo da logo (Y da logo esquerda é height - 3.5*cm)
         p.drawOn(c, text_x, height - 3 * cm - p_h)
 
-def draw_footer(c, width, height, qr_code_name=None):
+def draw_footer(c, width, height, qr_code_name=None, qr_size_cm=3.0, qr_right_margin_cm=1.0):
     c.setFillColorRGB(0, 0, 0)
     c.setFont("Helvetica", 10)
     c.drawString(1*cm, 1*cm, "Fonte: Nossa Escola em Dados")
@@ -84,5 +84,5 @@ def draw_footer(c, width, height, qr_code_name=None):
         qr_path = os.path.join("assets", "qr_codes", f"{name}.jpeg")
         
         if os.path.exists(qr_path):
-            qr_size = 3.0 * cm
-            c.drawImage(qr_path, width - qr_size - 1*cm, 0.5*cm, width=qr_size, height=qr_size, preserveAspectRatio=True)
+            qr_size = qr_size_cm * cm
+            c.drawImage(qr_path, width - qr_size - qr_right_margin_cm*cm, 0.5*cm, width=qr_size, height=qr_size, preserveAspectRatio=True)

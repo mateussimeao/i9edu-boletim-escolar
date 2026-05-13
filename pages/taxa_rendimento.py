@@ -70,7 +70,7 @@ def create_grouped_bar_chart(df, tipo, max_year, output_filename, color_palette,
     
     # Adicionar labels nas barras
     for container in ax.containers:
-        labels = [f'{v.get_height():.0f}%' if v.get_height() == 100 else f'{v.get_height():.1f}%' if v.get_height() > 0 else '' for v in container]
+        labels = [f'{v.get_height():.0f}%' if v.get_height() == 100 else f'{v.get_height():.0f}%' if v.get_height() > 0 else '' for v in container]
         ax.bar_label(container, labels=labels, label_type='edge', padding=1, fontsize=7, color='#555555', fontweight='bold')
         
     ax.tick_params(axis='x', which='major', labelsize=10, colors='#333333', rotation=0)
