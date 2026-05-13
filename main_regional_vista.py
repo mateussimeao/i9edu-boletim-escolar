@@ -83,8 +83,8 @@ def generate_regional_reports(regional, df_prosa, df_ideb_reg, df_mat_reg, df_fl
 def main():
     print("Iniciando geração de relatórios de MÉDIA REGIONAL (Estrutura Vista)...")
     
-    # output_dir = 'G:\Shared drives\Indicadores do Painel Educação à Vista\RELATORIOS SMED'
-    output_dir = 'relatorios_vista'
+    output_dir = 'G:\Shared drives\Indicadores do Painel Educação à Vista\RELATORIOS SMED'
+    # output_dir = 'relatorios_vista'
     os.makedirs(output_dir, exist_ok=True)
     
     # 1. Carregar e Padronizar Escolas (para unificação de regionais)
@@ -238,8 +238,8 @@ def main():
         generate_regional_reports(regional, df_prosa_reg, df_ideb_reg, df_mat_reg, df_fluencia_reg, df_taxa_reg, df_distorcao_reg, regional_dir, df_prosa_media_reg, df_sabe_reg, df_metas_reg)
         
         count += 1
-        if count == 2:
-            break
+        # if count == 2:
+        #     break
             
     print("Processo concluído.")
 

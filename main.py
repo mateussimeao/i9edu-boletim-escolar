@@ -50,8 +50,8 @@ def generate_school_report(escola, regional, df_prosa, df_ideb_escola, df_mat_es
 def main():
     print("Iniciando geração de relatórios (Plataforma Modular)...")
     
-    # output_dir = r'G:\Shared drives\Indicadores do Painel Educação à Vista\BOLETIM DAS ESCOLAS'
-    output_dir = 'relatorios'
+    output_dir = r'G:\Shared drives\Indicadores do Painel Educação à Vista\BOLETIM DAS ESCOLAS'
+    # output_dir = 'relatorios'
     # if os.path.exists(output_dir):
     #     shutil.rmtree(output_dir)
     os.makedirs(output_dir, exist_ok=True)
@@ -179,8 +179,8 @@ def main():
         generate_school_report(escola, regional, df_prosa_escola, df_ideb_escola, df_mat_escola, df_fluencia_escola, df_taxa_escola, df_distorcao_escola, regional_dir, df_prosa_media_escola, df_sabe_escola)
         
         count += 1
-        # if count > 1:
-        #     break
+        if count > 1:
+            break
             
     print("Processo concluído.")
 

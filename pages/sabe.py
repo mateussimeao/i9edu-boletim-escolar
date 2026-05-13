@@ -5,9 +5,9 @@ import numpy as np
 from reportlab.lib.units import cm
 from reportlab.lib import colors
 from reportlab.platypus import Paragraph
-from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.lib.styles import ParagraphStyle
 from pdf_engine import draw_header, draw_footer
-from fonts import FONT_TITULO, FONT_CABECALHO, FONT_NUMERO, FONT_TEXTO
+from fonts import FONT_TITULO, FONT_CABECALHO, FONT_TEXTO
 
 _df_ica = None
 
@@ -147,72 +147,86 @@ def create_stacked_bar_chart(df, disciplina, ano, output_filename):
 
 def render(c, width, height, df_escola):
     draw_header(c, width, height)
-    c.setFillColor(colors.HexColor('#056cad'))
-    c.setFont(FONT_TITULO, 17)
-    c.drawCentredString(width / 2.0, height - 4.5*cm, "SABE")
 
-    # ICA
-    ica_label = ""
+    # ICA value
+    ica_pct_str = None
     df_ica = _load_ica()
     if not df_ica.empty and hasattr(c, 'escola_nome'):
         sim_val = _get_ica_value(df_ica, c.escola_nome)
         if sim_val is not None:
-            pct_str = f"{sim_val * 100:.1f}".replace('.', ',')
-            ica_label = f"Indicador Criança Alfabetizada (ICA): {pct_str}%"
+            ica_pct_str = f"{sim_val * 100:.1f}".replace('.', ',')
 
+    style_n = ParagraphStyle(
+        'SabeTexto',
+        fontName=FONT_TEXTO,
+        fontSize=11,
+        leading=14,
+        alignment=4,
+    )
+    # --- ICA ---
+    c.setFillColor(colors.HexColor('#056cad'))
+    c.setFont(FONT_TITULO, 17)
+    ica_title = f"ICA - {ica_pct_str}%" if ica_pct_str else "ICA"
+    c.drawCentredString(width / 2.0, height - 4.5*cm, ica_title)
+
+    texto_ica = (
+        "O <b>ICA</b> (Indicador Criança Alfabetizada) é um indicador educacional que analisa o percentual de estudantes "
+        "do 2º ano do Ensino Fundamental considerados alfabetizados, com base nos resultados da avaliação de Língua "
+        "Portuguesa. Para a composição do indicador, considera-se alfabetizado o estudante que alcança proficiência maior "
+        "ou igual a 743 pontos, parâmetro utilizado para aferir o desenvolvimento das habilidades essenciais de leitura e escrita na idade adequada."
+    )
     c.setFillColorRGB(0, 0, 0)
-    paragraph_height = 5.1
-    if ica_label:
-        c.setFont(FONT_NUMERO, 11)
-        c.drawString(2*cm, height - 5.2*cm, ica_label)
-        paragraph_height = 5.8
+    p_ica_desc = Paragraph(texto_ica, style_n)
+    _, p_ica_desc_h = p_ica_desc.wrap(width - 4*cm, height)
+    ica_desc_y = height - 5.1*cm - p_ica_desc_h
+    p_ica_desc.drawOn(c, 2*cm, ica_desc_y)
 
-    styles = getSampleStyleSheet()
-    style_n = styles['Normal']
-    style_n.fontName = FONT_TEXTO
-    style_n.fontSize = 11
-    style_n.leading = 14
-    style_n.alignment = 4
+    # --- SABE ---
+    c.setFillColor(colors.HexColor('#056cad'))
+    c.setFont(FONT_TITULO, 17)
+    sabe_title_y = ica_desc_y - 1.4*cm
+    c.drawCentredString(width / 2.0, sabe_title_y, "SABE")
 
     texto_sabe = (
         "O <b>SABE</b> (Sistema de Avaliação Baiano de Educação) é um sistema de avaliação externa que visa analisar o "
         "desempenho dos estudantes nas escolas públicas e privadas da Bahia, em diferentes áreas do conhecimento, como "
         "Língua Portuguesa e Matemática."
     )
-    p = Paragraph(texto_sabe, style_n)
-    p_w, p_h = p.wrap(width - 4*cm, height)
-    p.drawOn(c, 2*cm, height - paragraph_height*cm - p_h)
-    
+    c.setFillColorRGB(0, 0, 0)
+    p_sabe = Paragraph(texto_sabe, style_n)
+    _, p_sabe_h = p_sabe.wrap(width - 4*cm, height)
+    p_sabe.drawOn(c, 2*cm, sabe_title_y - 0.6*cm - p_sabe_h)
+
     legenda_path = "assets/legenda.jpg"
     if os.path.exists(legenda_path):
-        c.drawImage(legenda_path, width/2 - 4*cm, height - 9.0*cm, 8*cm, 1*cm, preserveAspectRatio=True, anchor='s')
-    
+        c.drawImage(legenda_path, width/2 - 4*cm, height - 12.5*cm, 8*cm, 1*cm, preserveAspectRatio=True, anchor='s')
+
     chart_w = 8.5 * cm
     chart_h = 6.8 * cm
-    
+
     # Língua Portuguesa
     c.setFillColor(colors.HexColor('#056cad'))
     c.setFont(FONT_CABECALHO, 12)
-    c.drawCentredString(width / 2.0, height - 10.0*cm, "Língua Portuguesa")
-    
+    c.drawCentredString(width / 2.0, height - 13.0*cm, "Língua Portuguesa")
+
     img_lp_24 = create_stacked_bar_chart(df_escola, 'Língua Portuguesa', '2024', "tmp_sabe_lp_2024.png")
     img_lp_25 = create_stacked_bar_chart(df_escola, 'Língua Portuguesa', '2025', "tmp_sabe_lp_2025.png")
-    
-    y_lp = height - 17.3*cm
+
+    y_lp = height - 20.3*cm
     if img_lp_24:
         c.drawImage(img_lp_24, 1.5*cm, y_lp, width=chart_w, height=chart_h)
     if img_lp_25:
         c.drawImage(img_lp_25, 1.5*cm + chart_w + 0.5*cm, y_lp, width=chart_w, height=chart_h)
-        
+
     # Matemática
     c.setFillColor(colors.HexColor('#056cad'))
     c.setFont(FONT_CABECALHO, 12)
-    c.drawCentredString(width / 2.0, height - 18.3*cm, "Matemática")
-    
+    c.drawCentredString(width / 2.0, height - 21.3*cm, "Matemática")
+
     img_mat_24 = create_stacked_bar_chart(df_escola, 'Matemática', '2024', "tmp_sabe_mat_2024.png")
     img_mat_25 = create_stacked_bar_chart(df_escola, 'Matemática', '2025', "tmp_sabe_mat_2025.png")
-    
-    y_mat = height - 25.6*cm
+
+    y_mat = height - 28.6*cm
     if img_mat_24:
         c.drawImage(img_mat_24, 1.5*cm, y_mat, width=chart_w, height=chart_h)
     if img_mat_25:

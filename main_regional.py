@@ -53,7 +53,7 @@ def main():
 
     # 1. Carregar e Padronizar Escolas
     df_escolas = pd.read_parquet('data/prosa_escolas.parquet')
-    df_escolas['TRI_NM_REGIONAL'] = df_escolas['TRI_NM_REGIONAL'].replace(['CIDADE BAIXA', 'LIBERDADE', 'CIDADE BAIXA E LIBERDADE'], 'CIDADE BAIXA LIBERDADE')
+    df_escolas['TRI_NM_REGIONAL'] = df_escolas['TRI_NM_REGIONAL'].replace(['CIDADE BAIXA', 'LIBERDADE'], 'CIDADE BAIXA E LIBERDADE')
     df_escolas['TRI_NM_ESCOLA'] = df_escolas['TRI_NM_ESCOLA'].replace({
         'CENTRO MUNICIPAL DE EDUCACAO INFANTIL CSU DE PERNAMBUES': 'ESCOLA MUNICIPAL CSU DE PERNAMBUES',
         'CENTRO MUNICIPAL DE EDUCACAO INFANTIL JARDIM BRASILIA': 'ESCOLA MUNICIPAL JARDIM BRASILIA',
