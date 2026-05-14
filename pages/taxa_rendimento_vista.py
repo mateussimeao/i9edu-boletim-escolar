@@ -108,13 +108,16 @@ def render(c, width, height, df_taxa):
         df_for_chart = df_ativa
 
     etapa_str = "Consolidado" if (has_ai and has_af) else ('AnosIniciais' if has_ai else 'AnosFinais')
-    img_apv = create_grouped_bar_chart(df_for_chart, 'APV', max_year, f'tmp_taxa_apv_{etapa_str}.png', colors_apv, 'Aprovação')
-    img_rep = create_grouped_bar_chart(df_for_chart, 'REP', max_year, f'tmp_taxa_rep_{etapa_str}.png', colors_rep, 'Reprovação')
-    img_abn = create_grouped_bar_chart(df_for_chart, 'ABN', max_year, f'tmp_taxa_abn_{etapa_str}.png', colors_abn, 'Abandono')
-    
-    chart_available_h = y_after_kpi - 3*cm # Mais espaçamento para o rodapé
-    chart_h = min(chart_available_h / 3.0, 4.8*cm) # Altura máxima reduzida
-    chart_w = width - 4.5*cm; chart_x = (width - chart_w) / 2.0; curr_y = y_after_kpi - chart_h
+    n_anos = df_for_chart[df_for_chart['TXREN_ANO_ESCOLARIZACAO'] != 'Total']['TXREN_ANO_ESCOLARIZACAO'].nunique()
+    lbl_fs = 6.5 if n_anos > 5 else None
+    img_apv = create_grouped_bar_chart(df_for_chart, 'APV', max_year, f'tmp_taxa_apv_{etapa_str}.png', colors_apv, 'Aprovação', label_fontsize=lbl_fs)
+    img_rep = create_grouped_bar_chart(df_for_chart, 'REP', max_year, f'tmp_taxa_rep_{etapa_str}.png', colors_rep, 'Reprovação', label_fontsize=lbl_fs)
+    img_abn = create_grouped_bar_chart(df_for_chart, 'ABN', max_year, f'tmp_taxa_abn_{etapa_str}.png', colors_abn, 'Abandono', label_fontsize=lbl_fs)
+
+    chart_available_h = y_after_kpi - 3*cm
+    chart_h = min(chart_available_h / 3.0, 3.5*cm if n_anos > 5 else 4.8*cm)
+    chart_w = width - 1.5*cm if n_anos > 5 else width - 4.5*cm
+    chart_x = (width - chart_w) / 2.0; curr_y = y_after_kpi - chart_h
     
     if img_apv: c.drawImage(img_apv, chart_x, curr_y, width=chart_w, height=chart_h); os.remove(img_apv); curr_y -= chart_h
     if img_rep: c.drawImage(img_rep, chart_x, curr_y, width=chart_w, height=chart_h); os.remove(img_rep); curr_y -= chart_h

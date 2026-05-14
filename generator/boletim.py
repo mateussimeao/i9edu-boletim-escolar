@@ -121,11 +121,11 @@ def _render_regional(regional, df_prosa, df_ideb, df_mat, df_fluencia, df_taxa, 
 
     capa.render(c, width, height, f"REGIONAL: {regional}", regional)
     if not df_ideb.empty:
-        ideb_vista.render(c, width, height, df_ideb)
+        ideb.render(c, width, height, df_ideb, df_taxa)
     if not df_taxa.empty:
-        taxa_rendimento_vista.render(c, width, height, df_taxa)
+        taxa_rendimento.render(c, width, height, df_taxa)
     if not df_distorcao.empty:
-        distorcao_vista.render(c, width, height, df_distorcao)
+        distorcao.render(c, width, height, df_distorcao)
     if not df_prosa.empty:
         prosa.render(c, width, height, df_prosa)
     if df_prosa_media is not None and not df_prosa_media.empty:
@@ -160,11 +160,11 @@ def _render_rede(df_prosa, df_ideb, df_mat, df_fluencia, df_taxa, df_distorcao, 
 
     capa.render(c, width, height, "REDE MUNICIPAL", "TODAS AS REGIONAIS")
     if not df_ideb.empty:
-        ideb_vista.render(c, width, height, df_ideb)
+        ideb.render(c, width, height, df_ideb, df_taxa)
     if not df_taxa.empty:
-        taxa_rendimento_vista.render(c, width, height, df_taxa)
+        taxa_rendimento.render(c, width, height, df_taxa)
     if not df_distorcao.empty:
-        distorcao_vista.render(c, width, height, df_distorcao)
+        distorcao.render(c, width, height, df_distorcao)
     if not df_prosa.empty:
         prosa.render(c, width, height, df_prosa)
     if df_prosa_media is not None and not df_prosa_media.empty:

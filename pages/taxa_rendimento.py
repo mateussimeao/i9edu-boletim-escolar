@@ -16,7 +16,7 @@ except ImportError:
     FONT_NUMERO = 'Helvetica-Bold'
     FONT_TEXTO = 'Helvetica'
 
-def create_grouped_bar_chart(df, tipo, max_year, output_filename, color_palette, title):
+def create_grouped_bar_chart(df, tipo, max_year, output_filename, color_palette, title, label_fontsize=None):
     # Filtrar tipo (APV, REP, ABN)
     df_filter = df[df['TXREN_TIPO'] == tipo].copy()
     if df_filter.empty:
@@ -49,31 +49,35 @@ def create_grouped_bar_chart(df, tipo, max_year, output_filename, color_palette,
     # pivot_df = pivot_df.iloc[::-1]  # REMOVIDO para barras verticais
     
     n_cols = len(pivot_df)
-    fig_width = max(6.5, n_cols * 1.0)
-    fig_height = 2.5
-    
+    many_cols = n_cols > 5
+    fig_width = max(6.5, n_cols * 1.5) if not many_cols else max(8.0, n_cols * 1.3)
+    fig_height = 2.5 if not many_cols else 2.0
+    bar_width = 0.75 if not many_cols else 0.88
+    if label_fontsize is None:
+        label_fontsize = 7 if not many_cols else 8
+
     fig, ax = plt.subplots(figsize=(fig_width, fig_height))
-    
-    pivot_df.plot(kind='bar', color=color_palette, ax=ax, width=0.8)
-    
+
+    pivot_df.plot(kind='bar', color=color_palette, ax=ax, width=bar_width)
+
     # Título do gráfico (Aprovação, Reprovação ou Abandono)
     ax.set_title(title, fontsize=10, fontweight='bold', color='#333333', pad=40)
     ax.set_xlabel('')
     ax.set_ylabel('')
-    
+
     # Configurar eixos
     ax.set_yticks([]) # Sem valores no eixo y
     ax.spines['bottom'].set_color('#cccccc')
     ax.spines['top'].set_visible(False)
     ax.spines['right'].set_visible(False)
     ax.spines['left'].set_visible(False)
-    
+
     # Adicionar labels nas barras
     for container in ax.containers:
-        labels = [f'{v.get_height():.0f}%' if v.get_height() == 100 else f'{v.get_height():.0f}%' if v.get_height() > 0 else '' for v in container]
-        ax.bar_label(container, labels=labels, label_type='edge', padding=1, fontsize=7, color='#555555', fontweight='bold')
-        
-    ax.tick_params(axis='x', which='major', labelsize=10, colors='#333333', rotation=0)
+        labels = [f'{v.get_height():.0f}%' if v.get_height() == 100 else f'{v.get_height():.1f}%' if v.get_height() > 0 else '' for v in container]
+        ax.bar_label(container, labels=labels, label_type='edge', padding=1, fontsize=label_fontsize, color='#1F1F1F', fontweight='bold')
+
+    ax.tick_params(axis='x', which='major', labelsize=10 if not many_cols else 8, colors='#333333', rotation=0)
     # Eixo X rótulos em negrito
     for label in ax.get_xticklabels():
         label.set_fontweight('bold')
@@ -200,15 +204,16 @@ def render(c, width, height, df_taxa):
         y_after_kpi = _draw_kpi_table(c, 2*cm, text_y - 0.5*cm, width - 4*cm, 4*cm, df_etapa, max_year)
         
         # Gráficos de Barras
+        n_anos_escol = df_etapa[df_etapa['TXREN_ANO_ESCOLARIZACAO'] != 'Total']['TXREN_ANO_ESCOLARIZACAO'].nunique()
+        many_cols_render = n_anos_escol > 5
         img_apv = create_grouped_bar_chart(df_etapa, 'APV', max_year, f'tmp_taxa_apv_{etapa.replace(" ","")}.png', colors_apv, 'Aprovação')
         img_rep = create_grouped_bar_chart(df_etapa, 'REP', max_year, f'tmp_taxa_rep_{etapa.replace(" ","")}.png', colors_rep, 'Reprovação')
         img_abn = create_grouped_bar_chart(df_etapa, 'ABN', max_year, f'tmp_taxa_abn_{etapa.replace(" ","")}.png', colors_abn, 'Abandono')
-        
+
         # Altura disponível para gráficos
         chart_available_h = y_after_kpi - 2*cm
         chart_h = chart_available_h / 3.0
-        # Limitar altura pra não distorcer muito (max 6cm)
-        chart_h = min(chart_h, 5.5*cm)
+        chart_h = min(chart_h, 2.8*cm if many_cols_render else 5.5*cm)
         chart_w = width - 6.5*cm
         chart_x = (width - chart_w) / 2.0
         

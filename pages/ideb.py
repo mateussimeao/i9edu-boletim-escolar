@@ -94,7 +94,7 @@ def _create_line_chart(anos, valores, color, title, output_filename, ylabel=""):
 
     for i, (a, v) in enumerate(zip(anos, valores)):
         ax.annotate(
-            f"{v:.2f}" if isinstance(v, float) and v < 1 else f"{v}",
+            f"{v:.2f}" if isinstance(v, float) and v < 1 else f"{v:.1f}" if isinstance(v, float) else f"{v}",
             (a, v),
             textcoords="offset points",
             xytext=(0, 12),
