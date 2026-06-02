@@ -291,6 +291,9 @@ def _render_page_ideb(c, width, height, etapa, data):
 # ─── Página 2: IDEB Nota Padronizada ────────────────────────────────────────
 
 def _render_page_nota_padronizada(c, width, height, etapa, data):
+    if not data.get("matematica") or not data.get("lingua_portuguesa") or not data.get("nota_padronizada"):
+        return
+
     draw_header(c, width, height)
 
     # Título
