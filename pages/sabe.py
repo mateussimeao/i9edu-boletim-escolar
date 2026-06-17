@@ -166,20 +166,24 @@ def render(c, width, height, df_escola):
     # --- ICA ---
     c.setFillColor(colors.HexColor('#056cad'))
     c.setFont(FONT_TITULO, 17)
-    ica_title = f"ICA - {ica_pct_str}%" if ica_pct_str else "ICA"
-    c.drawCentredString(width / 2.0, height - 4.5*cm, ica_title)
+    c.drawCentredString(width / 2.0, height - 4.5*cm, "ICA - Indicador Criança Alfabetizada")
 
     texto_ica = (
-        "O <b>ICA</b> (Indicador Criança Alfabetizada) é um indicador educacional que analisa o percentual de estudantes "
-        "do 2º ano do Ensino Fundamental considerados alfabetizados, com base nos resultados da avaliação de Língua "
-        "Portuguesa. Para a composição do indicador, considera-se alfabetizado o estudante que alcança proficiência maior "
-        "ou igual a 743 pontos, parâmetro utilizado para aferir o desenvolvimento das habilidades essenciais de leitura e escrita na idade adequada."
+        "O <b>ICA</b> (Indicador Criança Alfabetizada) mede o percentual de alunos do 2º ano do Ensino Fundamental "
+        "considerados alfabetizados com base na avaliação de Língua Portuguesa. São considerados alfabetizados os "
+        "estudantes que alcançam proficiência igual ou superior a 743 pontos, demonstrando habilidades essenciais de leitura e escrita."
     )
     c.setFillColorRGB(0, 0, 0)
     p_ica_desc = Paragraph(texto_ica, style_n)
     _, p_ica_desc_h = p_ica_desc.wrap(width - 4*cm, height)
     ica_desc_y = height - 5.1*cm - p_ica_desc_h
     p_ica_desc.drawOn(c, 2*cm, ica_desc_y)
+
+    resultado_str = f"{ica_pct_str}%" if ica_pct_str else "-"
+    c.setFillColorRGB(0, 0, 0)
+    c.setFont(FONT_TITULO, 17)
+    c.drawCentredString(width / 2.0, ica_desc_y - 0.7*cm, f"Resultado: {resultado_str}")
+    ica_desc_y = ica_desc_y - 1.2*cm
 
     # --- SABE ---
     c.setFillColor(colors.HexColor('#056cad'))
